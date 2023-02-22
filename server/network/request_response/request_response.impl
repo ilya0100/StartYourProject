@@ -1,0 +1,179 @@
+#pragma once
+
+#include "request_response.hpp"
+
+#define LOGIN_DATA_DONT_MATCH "Username or password dont match"
+#define NEED_AUTHORIATION "Authorization is required for this operation."
+#define SAME_NAME "The name already exists"
+#define CONTENT_NOT_FOUND "Requested content not found"
+#define DB_ERROR "Data base error"
+#define BAD_DATA "Unknown target or invalid body data"
+
+
+
+template <typename BodyType>
+void Response<BodyType>::set_status(ResponseStatus status, bool keep_alive, int ver) {
+    res_ = {static_cast<http::status>(status), ver};
+    res_.set(http::field::server, SERVER_NAME);
+    res_.keep_alive(keep_alive);
+}
+
+
+template <typename BodyType>
+void Response<BodyType>::set_body(const std::string& body, ContentType type) {
+    switch (type) {
+    case ContentType::json:
+        res_.set(http::field::content_type, CONTENT_TYPE_JSON);
+        break;
+
+    default:
+        res_.set(http::field::content_type, CONTENT_TYPE_TEXT);
+        break;
+    }
+    res_.body() = body;
+    res_.prepare_payload();
+}
+
+template <typename BodyType>
+void Response<BodyType>::set_error_message(ResponseStatus status) {
+    set_status(status);
+
+    switch (status) {
+    case ResponseStatus::not_found:
+        set_body(CONTENT_NOT_FOUND);
+        break;
+
+    case ResponseStatus::conflict:
+        set_body(LOGIN_DATA_DONT_MATCH);
+        break;
+
+    case ResponseStatus::forbidden:
+        set_body(SAME_NAME);
+        break;
+
+    case ResponseStatus::unauthorized:
+        set_body(NEED_AUTHORIATION);
+        break;
+
+    case ResponseStatus::bad_req:
+        set_body(BAD_DATA);
+        break;
+
+    default:
+        set_status(ResponseStatus::server_error);
+        break;
+    }
+}
+
+
+inline JSON::JSON(const std::string& str): IJSON(str) {
+    json::stream_parser p;
+    json::error_code ec;
+
+    p.write(str.data(), str.size(), ec);
+    if(ec) {
+        std::cerr << ec.message();
+    }
+
+    p.finish(ec);
+    if(ec) {
+        std::cerr << ec.message();
+    }
+
+    value_ =  p.release();
+}
+
+template<>
+inline std::string JSON::get<std::string>(const std::string &key) {
+    json::object obj;
+    if(value_.is_null()) {
+        obj = value_.emplace_object();
+    } else {
+        obj = value_.as_object();
+    }
+    return obj[key].as_string().c_str();
+}
+
+template<>
+inline int JSON::get<int>(const std::string &key) {
+    json::object obj;
+    if(value_.is_null()) {
+        obj = value_.emplace_object();
+    } else {
+        obj = value_.as_object();
+    }
+    return obj[key].as_int64();
+}
+
+template<>
+inline double JSON::get<double>(const std::string &key) {
+    json::object obj;
+    if(value_.is_null()) {
+        obj = value_.emplace_object();
+    } else {
+        obj = value_.as_object();
+    }
+    return obj[key].as_double();
+}
+
+template<>
+inline bool JSON::get<bool>(const std::string &key) {
+    json::object obj;
+    if(value_.is_null()) {
+        obj = value_.emplace_object();
+    } else {
+        obj = value_.as_object();
+    }
+    return obj[key].as_bool();
+}
+
+template<>
+inline std::vector<std::string> JSON::get<std::vector<std::string>>(const std::string &key) {
+    json::object obj;
+    if(value_.is_null()) {
+        obj = value_.emplace_object();
+    } else {
+        obj = value_.as_object();
+    }
+    
+    json::array arr = obj[key].as_array();
+    std::vector<std::string> result;
+    for (auto it : arr) {
+        if (it.as_string().size() != 0) {
+            result.push_back(it.as_string().c_str());
+        }
+    }
+    return result;
+}
+
+template <typename T>
+void JSON::put(const std::string &key, T value) {
+    json::object* obj;
+    
+    if(value_.is_null()) {
+        obj = &value_.emplace_object();
+    } else {
+        obj = &value_.as_object();
+    }
+    (*obj)[key] = value;
+}
+
+template <typename T>
+void JSON::put(const std::string &key, const std::vector<T> &values) {
+    json::object* obj;
+
+    if(value_.is_null())
+        obj = &value_.emplace_object();
+    else
+        obj = &value_.as_object();
+    
+    json::array arr;
+    for (size_t i = 0; i < values.size(); ++i) {
+        arr.emplace_back(values[i]);
+    }
+    (*obj)[key] = std::move(arr);
+}
+
+inline std::string JSON::serialize() {
+    return json::serialize(value_);
+}
