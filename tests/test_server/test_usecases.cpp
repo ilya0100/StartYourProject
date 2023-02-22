@@ -143,7 +143,6 @@ TEST(GetUserProfileUCTest, GoodCase) {
 
 
 static ProjectData post;
-// static RequestToPostData req = {1,2, "cool project", "I really want to join your team", RequestToPostData::Status::unknown};
 
 TEST(EditPostTest, UC) {
     post.username = "admin";
@@ -177,13 +176,6 @@ TEST(GetPostTest, UC) {
     EXPECT_EQ(ResponseStatus::ok, msg.status);
 }
 
-// TEST(MakeRequestToPostTest, UC) {
-//     MockDB db;
-//     EXPECT_CALL(db, InsertIntoRequestToPostTable(req)).Times(AtLeast(1)).WillOnce(Return(true));
-//     MakeRequestToPost Test_1(&db);
-//     EXPECT_EQ(Test_1.makeReqToPost(req), ResponseStatus::ok);
-// }
-
 TEST(DeletePostTest, UC) {
     MockDB db;
     std::string auth_token = "323324";
@@ -197,20 +189,6 @@ TEST(DeletePostTest, UC) {
     DeletePostUC Test_1(&db);
     EXPECT_EQ(Test_1.delPostData(post, auth_token), ResponseStatus::ok);
 }
-
-// TEST(AnswerTheRequestTest, UC) {
-//     MockDB db;
-//     EXPECT_CALL(db, EditRequestToPostTable(req)).Times(AtLeast(1)).WillOnce(Return(true));
-//     AnswerTheRequest Test_1(&db);
-//     EXPECT_EQ(Test_1.getAnswer(false, req), ResponseStatus::ok);
-// }
-
-// TEST(ShowNotificationsTest, UC) {
-//     MockDB db;
-//     ShowNotifications Test_1(&db);
-//     Message<NotificationData> msg = Test_1.showAllNotifications(1);
-//     EXPECT_EQ(ResponseStatus::ok, msg.status);
-// }
 
 TEST(CreatePostTest, UC) {
     MockDB db;
