@@ -23,13 +23,13 @@ build:
 rebuild: clean build
 
 build_server_tests:
-	./build.sh -DWITH_SERVER_TESTS=ON -DWITH_CLIENT_TESTS=OFF
+	./build.sh -DSERVER=ON -DCLIENT=OFF -DWITH_SERVER_TESTS=ON -DWITH_CLIENT_TESTS=OFF
 
 build_client_tests:
-	./build.sh -DWITH_SERVER_TESTS=OFF -DWITH_CLIENT_TESTS=ON
+	./build.sh -DSERVER=OFF -DCLIENT=ON -DWITH_SERVER_TESTS=OFF -DWITH_CLIENT_TESTS=ON
 
 build_tests:
-	./build.sh -DWITH_SERVER_TESTS=ON -DWITH_CLIENT_TESTS=ON
+	./build.sh -DSERVER=ON -DCLIENT=ON -DWITH_SERVER_TESTS=ON -DWITH_CLIENT_TESTS=ON
 
 run_server_tests:
 	./build/tests/test_server/test_server_syp --gtest_filter=${TEST_FILTER}
