@@ -101,7 +101,7 @@ TEST(EditProfileUCTest, GoodCase) {
     test_data.user_description = "some text";
     test_data.password = "1234qwerty";
 
-    EXPECT_CALL(database, FindToken(test_data.username, test_data.auth_token))
+    EXPECT_CALL(database, FindToken(test_data.username))
                 .Times(1).WillOnce(Return(false));
 
     EXPECT_CALL(database, EditUserInPersonTable(test_data))
@@ -118,7 +118,7 @@ TEST(DelUserProfileUCTest, GoodCase) {
     test_data.username = "test123";
     test_data.auth_token = "23132";
 
-    EXPECT_CALL(database, FindToken(test_data.username, test_data.auth_token))
+    EXPECT_CALL(database, FindToken(test_data.username))
                 .Times(1).WillOnce(Return(false));
 
     EXPECT_CALL(database, DeleteFromPersonTable(test_data.username))
@@ -155,7 +155,7 @@ TEST(EditPostTest, UC) {
     std::string auth_token = "323324";
     MockDB db;
 
-    EXPECT_CALL(db, FindToken(post.username, auth_token))
+    EXPECT_CALL(db, FindToken(post.username))
                 .Times(1).WillOnce(Return(false));
 
     EXPECT_CALL(db, EditPostInPostTable(post))
@@ -180,7 +180,7 @@ TEST(DeletePostTest, UC) {
     MockDB db;
     std::string auth_token = "323324";
 
-    EXPECT_CALL(db, FindToken(post.username, auth_token))
+    EXPECT_CALL(db, FindToken(post.username))
                 .Times(1).WillOnce(Return(false));
 
     EXPECT_CALL(db, DeleteFromPostTable(post.project_name))
@@ -203,4 +203,3 @@ TEST(CreatePostTest, UC) {
     CreatePostUC Test_1(&db);
     EXPECT_EQ(Test_1.addPostToDB(post, auth_token), ResponseStatus::ok);
 }
-
